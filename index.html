@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه استعلام پروانه اشتغال</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #16323F;
+    --navy-deep: #0E2530;
+    --sand: #EFE6D3;
+    --paper: #FAF6EC;
+    --gold: #B8863B;
+    --gold-bright: #D6A85C;
+    --ink: #1B1B18;
+    --line: rgba(22,50,63,0.12);
+    --radius: 12px;
+    --shadow-card: 0 20px 50px -20px rgba(14,37,48,0.25);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Vazirmatn', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.8;
+    overflow-x:hidden;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; direction:ltr; }
+  ::selection{ background:var(--gold-bright); color:var(--navy-deep); }
+  a{color:inherit; text-decoration:none;}
+
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,246,236,0.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    max-width:1200px; margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:40px; height:40px; border-radius:8px;
+    background:linear-gradient(145deg, var(--navy), var(--navy-deep));
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:900; color:var(--gold-bright);
+    box-shadow: 0 0 0 1px rgba(214,168,92,0.25);
+  }
+  .brand-name{ font-weight:700; font-size:16px; color:var(--navy-deep); }
+  .brand-sub{ font-size:11px; color:var(--gold); letter-spacing:.5px; }
+  nav.links{ display:flex; gap:32px; font-size:14.5px; }
+  nav.links a{ color:var(--navy); opacity:.7; transition:opacity .2s; }
+  nav.links a:hover{ opacity:1; }
+  .cta-btn{
+    background:var(--navy-deep); color:var(--sand);
+    padding:10px 24px; border-radius:6px; font-size:14px; font-weight:500;
+    border:1px solid var(--navy-deep); cursor:pointer;
+    transition:all .25s;
+  }
+  .cta-btn:hover{ background:transparent; color:var(--navy-deep); }
+  .cta-gold{
+    background:var(--gold); border-color:var(--gold); color:var(--navy-deep);
+  }
+  .cta-gold:hover{ background:transparent; color:var(--gold); }
+
+  .hero{
+    max-width:1200px; margin:0 auto; padding:70px 28px 50px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:60px; align-items:center;
+  }
+  .eyebrow{
+    font-size:12px; letter-spacing:1.5px;
+    color:var(--gold); text-transform:uppercase;
+    display:flex; align-items:center; gap:10px; margin-bottom:20px;
+  }
+  .eyebrow::before{ content:''; width:30px; height:1.5px; background:var(--gold); }
+  h1{ font-size:42px; font-weight:900; color:var(--navy-deep); line-height:1.3; margin-bottom:16px; }
+  h1 span{ color:var(--gold); }
+  .hero p.lead{ font-size:16px; color:#4a4a44; max-width:500px; margin-bottom:28px; }
+  .hero-actions{ display:flex; gap:12px; flex-wrap:wrap; }
+
+  .card-stage{ position:relative; height:300px; }
+  .id-card{
+    position:absolute; width:320px; height:200px; border-radius:14px;
+    background:linear-gradient(145deg, var(--navy), var(--navy-deep));
+    box-shadow:var(--shadow-card);
+    padding:20px 22px; color:var(--sand);
+    top:50%; left:50%; transform:translate(-50%,-52%) rotate(-3deg);
+  }
+  .id-card::before{
+    content:''; position:absolute; inset:0; border-radius:14px;
+    background:repeating-linear-gradient(115deg, transparent 0 18px, rgba(214,168,92,0.04) 18px 19px);
+  }
+  .id-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .id-title{ font-size:10px; letter-spacing:1.5px; color:var(--gold-bright); }
+  .id-seal{ width:28px; height:28px; border:1.5px solid var(--gold-bright); border-radius:50%; opacity:.6; }
+  .id-fields{ margin-top:22px; display:flex; flex-direction:column; gap:8px; }
+  .id-row{ display:flex; justify-content:space-between; font-size:11.5px; }
+  .id-row .k{ opacity:.5; font-size:10px; }
+  .id-row .v{ letter-spacing:.5px; }
+  .id-row .v.blur{ filter:blur(3px); opacity:.5; }
+  .scan-line{
+    position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+    animation:scan 3.4s ease-in-out infinite;
+  }
+  @keyframes scan{
+    0%{ top:6%; opacity:0; } 10%{opacity:1;} 90%{opacity:1;} 100%{ top:94%; opacity:0; }
+  }
+  .id-status{
+    position:absolute; bottom:22px; left:22px; right:22px;
+    display:flex; align-items:center; gap:8px; font-size:10.5px;
+  }
+  .dot{ width:6px; height:6px; border-radius:50%; background:#7CBE8E; box-shadow:0 0 8px #7CBE8E; }
+  .card-shadow-2{
+    position:absolute; width:320px; height:200px; border-radius:14px;
+    background:var(--sand); top:50%; left:50%;
+    transform:translate(-46%,-46%) rotate(4deg); z-index:-1; opacity:.5;
+    border:1px solid var(--line);
+  }
+
+  .trustbar{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:var(--sand);
+  }
+  .trustbar-inner{
+    max-width:1200px; margin:0 auto; padding:18px 28px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px;
+    font-size:13px; color:var(--navy-deep); opacity:.85;
+  }
+  .trustbar-inner div{ display:flex; align-items:center; gap:8px; }
+  .trustbar-inner .num{ font-family:'IBM Plex Mono'; font-weight:600; color:var(--gold); font-size:15px; }
+
+  section{ max-width:1200px; margin:0 auto; padding:70px 28px; }
+  .section-head{ max-width:600px; margin-bottom:48px; }
+  h2{ font-size:30px; font-weight:800; color:var(--navy-deep); margin-bottom:12px; }
+  .section-head p{ color:#5a5a52; font-size:15px; }
+
+  .inquiry-wrapper{
+    background:var(--navy-deep); border-radius:16px; padding:48px 48px 56px;
+    color:var(--sand);
+  }
+  .inquiry-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;
+  }
+  .inquiry-grid h2{ color:var(--sand); }
+  .inquiry-grid .section-head p{ color:rgba(239,230,211,0.6); }
+  .inquiry-form{ background:rgba(239,230,211,0.05); border:1px solid rgba(239,230,211,0.1); border-radius:10px; padding:28px; }
+  .field{ margin-bottom:16px; }
+  .field label{ font-size:12.5px; color:rgba(239,230,211,0.7); display:block; margin-bottom:6px; }
+  .field input{
+    width:100%; padding:12px 14px; border-radius:6px; border:1px solid rgba(239,230,211,0.15);
+    background:rgba(250,246,236,0.04); color:var(--sand);
+    font-size:14px; outline:none; transition:border .2s;
+  }
+  .field input::placeholder{ color:rgba(239,230,211,0.3); }
+  .field input:focus{ border-color:var(--gold-bright); }
+
+  .result-card{
+    margin-top:24px;
+    background:rgba(250,246,236,0.06);
+    border:1px solid rgba(239,230,211,0.12);
+    border-radius:10px;
+    padding:0;
+    display:none;
+    overflow:hidden;
+  }
+  .result-header{
+    background:var(--gold); padding:12px 20px; color:var(--navy-deep);
+    font-weight:700; font-size:15px; text-align:center;
+  }
+  .result-body{
+    padding:24px 28px 28px;
+    display:grid;
+    grid-template-columns:140px 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  .result-photo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .result-photo img{
+    width:120px;
+    height:120px;
+    border:3px solid var(--gold-bright);
+    object-fit:cover;
+    background:#2a4a5a;
+  }
+  .result-photo .no-photo{
+    width:120px;
+    height:120px;
+    border:3px solid var(--gold-bright);
+    background:#2a4a5a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:48px;
+    color:rgba(239,230,211,0.3);
+  }
+  .result-info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 24px;
+  }
+  .result-info .item .label{
+    font-size:10.5px;
+    color:rgba(239,230,211,0.5);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+  }
+  .result-info .item .value{
+    font-size:15px;
+    font-weight:500;
+    color:var(--sand);
+    margin-top:2px;
+  }
+
+  .about-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;
+  }
+  .about-text p{ color:#4a4a44; margin-bottom:14px; font-size:15px; }
+
+  .process{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+  }
+  .step{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:24px 22px;
+    transition:transform .2s;
+  }
+  .step:hover{ transform:translateY(-3px); }
+  .step .num{ font-family:'IBM Plex Mono'; font-size:20px; color:var(--gold); font-weight:600; }
+  .step h3{ font-size:16px; color:var(--navy-deep); margin:6px 0 4px; }
+  .step p{ font-size:13.5px; color:#5a5a52; }
+
+  .services{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .svc{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    padding:28px 24px; transition:transform .2s;
+  }
+  .svc:hover{ transform:translateY(-4px); box-shadow:var(--shadow-card); }
+  .svc h3{ font-size:16px; color:var(--navy-deep); margin-bottom:6px; }
+  .svc p{ font-size:13.5px; color:#5a5a52; }
+
+  footer{ border-top:1px solid var(--line); padding:40px 28px 24px; }
+  .footer-inner{
+    max-width:1200px; margin:0 auto; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:30px; font-size:13.5px; color:#6a6a60;
+  }
+  .footer-cols{ display:flex; gap:60px; flex-wrap:wrap; }
+  .footer-col h4{ font-size:13px; color:var(--navy-deep); margin-bottom:12px; }
+  .footer-col a{ display:block; opacity:.7; margin-bottom:8px; transition:opacity .2s; }
+  .footer-col a:hover{ opacity:1; }
+  .footer-bottom{
+    max-width:1200px; margin:32px auto 0; padding-top:16px; border-top:1px solid var(--line);
+    font-size:12px; color:#8a8a80; display:flex; justify-content:center;
+  }
+
+  .loading-status{
+    display:none;
+    text-align:center;
+    padding:16px 20px;
+    margin-top:16px;
+    background:rgba(214,168,92,0.12);
+    border:1px solid rgba(214,168,92,0.2);
+    border-radius:8px;
+    color:var(--gold-bright);
+    font-weight:600;
+    font-size:15px;
+  }
+  .loading-status .dots::after{
+    content:'';
+    animation:dots 1.5s steps(4) infinite;
+  }
+  @keyframes dots{
+    0%{ content:''; }
+    25%{ content:'.'; }
+    50%{ content:'..'; }
+    75%{ content:'...'; }
+  }
+
+  @media (max-width: 860px){
+    .hero{ grid-template-columns:1fr; padding-top:40px; gap:30px; }
+    .card-stage{ height:220px; order:-1; }
+    .id-card{ width:280px; height:180px; padding:16px 18px; }
+    .card-shadow-2{ width:280px; height:180px; }
+    .inquiry-grid{ grid-template-columns:1fr; gap:30px; }
+    .inquiry-wrapper{ padding:32px 20px; }
+    .result-body{ grid-template-columns:1fr; text-align:center; }
+    .result-photo{ align-items:center; }
+    .result-info{ grid-template-columns:1fr; }
+    .about-grid{ grid-template-columns:1fr; }
+    .process{ grid-template-columns:1fr; }
+    .services{ grid-template-columns:1fr; }
+    nav.links{ display:none; }
+    h1{ font-size:30px; }
+  }
+  @media (max-width: 480px){
+    .id-card{ width:94%; height:170px; }
+    .card-shadow-2{ width:94%; height:170px; }
+    .hero-actions .cta-btn{ width:100%; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <div class="brand-mark">ع</div>
+      <div>
+        <div class="brand-name">سامانه استعلام پروانه اشتغال</div>
+        <div class="brand-sub">WORK PERMIT VERIFICATION</div>
+      </div>
+    </div>
+    <nav class="links">
+      <a href="#about">درباره ما</a>
+      <a href="#process">فرآیند استعلام</a>
+      <a href="#services">خدمات</a>
+      <a href="#inquiry">استعلام</a>
+      <a href="#contact">تماس</a>
+    </nav>
+    <button class="cta-btn" onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth'})">استعلام</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">سامانه هوشمند استعلام پروانه اشتغال</div>
+    <h1>استعلام سریع و <span>مطمئن</span><br>وضعیت پروانه اشتغال</h1>
+    <p class="lead">با وارد کردن شناسه یکتا، وضعیت اعتبار، تاریخ صدور و انقضای پروانه اشتغال خود را به‌صورت آنی و شفاف دریافت کنید.</p>
+    <div class="hero-actions">
+      <button class="cta-btn cta-gold" onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth'})">شروع استعلام</button>
+      <button class="cta-btn" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})">راهنمای استفاده</button>
+    </div>
+  </div>
+  <div class="card-stage">
+    <div class="card-shadow-2"></div>
+    <div class="id-card">
+      <div class="scan-line"></div>
+      <div class="id-top">
+        <div class="id-title">WORK · PERMIT</div>
+        <div class="id-seal"></div>
+      </div>
+      <div class="id-fields">
+        <div class="id-row"><span class="k">شناسه یکتا</span><span class="v blur">●●●●●●</span></div>
+        <div class="id-row"><span class="k">وضعیت</span><span class="v blur">در حال بررسی</span></div>
+        <div class="id-row"><span class="k">اعتبار تا</span><span class="v">۱۴۰۴ / ۰۶</span></div>
+      </div>
+      <div class="id-status"><span class="dot"></span> اتصال امن برقرار است</div>
+    </div>
+  </div>
+</section>
+
+<div class="trustbar">
+  <div class="trustbar-inner">
+    <div><span class="num">امن</span> عدم نگهداری اطلاعات هویتی</div>
+    <div><span class="num">پشتیبانی</span> پاسخگویی تمام روزهای هفته</div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="eyebrow">درباره ما</div>
+      <h2>مرجع شفاف استعلام پروانه اشتغال</h2>
+      <p>ما به عنوان یک سامانه مشاوره‌ای مستقل، فرآیند پیگیری وضعیت پروانه‌های اشتغال را برای اتباع خارجی و کارفرمایان ساده کرده‌ایم.</p>
+      <p>هدف ما کاهش سردرگمی، شفافیت در فرآیندهای اداری و ارائه اطلاعات دقیق در کوتاه‌ترین زمان ممکن است.</p>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--line); border-radius:10px; overflow:hidden;">
+      <div class="stat" style="background:var(--paper); padding:20px 18px;"><div style="font-family:'IBM Plex Mono'; font-size:26px; font-weight:600; color:var(--navy-deep);">۱۸</div><div style="font-size:12px; color:#6a6a60;">استان تحت پوشش</div></div>
+      <div class="stat" style="background:var(--paper); padding:20px 18px;"><div style="font-family:'IBM Plex Mono'; font-size:26px; font-weight:600; color:var(--navy-deep);">۴</div><div style="font-size:12px; color:#6a6a60;">زبان پشتیبانی</div></div>
+      <div class="stat" style="background:var(--paper); padding:20px 18px;"><div style="font-family:'IBM Plex Mono'; font-size:26px; font-weight:600; color:var(--navy-deep);">۲۴h</div><div style="font-size:12px; color:#6a6a60;">میانگین زمان پاسخ</div></div>
+      <div class="stat" style="background:var(--paper); padding:20px 18px;"><div style="font-family:'IBM Plex Mono'; font-size:26px; font-weight:600; color:var(--navy-deep);">۰۲۱</div><div style="font-size:12px; color:#6a6a60;">کد تماس تهران</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="section-head">
+    <div class="eyebrow">راهنمای استفاده</div>
+    <h2>فرآیند استعلام در چهار گام</h2>
+    <p>مسیری ساده و خطی برای دریافت وضعیت پروانه اشتغال.</p>
+  </div>
+  <div class="process">
+    <div class="step"><div class="num">۰۱</div><h3>ثبت شناسه یکتا</h3><p>شناسه ۶ رقمی پروانه اشتغال خود را در فرم وارد کنید.</p></div>
+    <div class="step"><div class="num">۰۲</div><h3>بررسی در سامانه</h3><p>اطلاعات شما با پایگاه داده مرجع تطبیق داده می‌شود.</p></div>
+    <div class="step"><div class="num">۰۳</div><h3>دریافت وضعیت</h3><p>وضعیت اعتبار، تاریخ صدور و انقضای پروانه نمایش داده می‌شود.</p></div>
+    <div class="step"><div class="num">۰۴</div><h3>گزارش نهایی</h3><p>نتیجه استعلام به همراه جزئیات کامل در اختیار شما قرار می‌گیرد.</p></div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="section-head">
+    <div class="eyebrow">خدمات ما</div>
+    <h2>چه خدماتی ارائه می‌دهیم؟</h2>
+  </div>
+  <div class="services">
+    <div class="svc"><h3>استعلام تکی</h3><p>بررسی وضعیت یک پروانه اشتغال با استفاده از شناسه یکتا.</p></div>
+    <div class="svc"><h3>استعلام گروهی</h3><p>راستی‌آزمایی هم‌زمان چند پروانه برای کارفرمایان و سازمان‌ها.</p></div>
+    <div class="svc"><h3>مشاوره تمدید</h3><p>راهنمایی گام‌به‌گام برای تمدید پروانه اشتغال پیش از انقضا.</p></div>
+  </div>
+</section>
+
+<section id="inquiry">
+  <div class="inquiry-wrapper">
+    <div class="inquiry-grid">
+      <div>
+        <div class="section-head" style="margin-bottom:0;">
+          <div class="eyebrow" style="color:var(--gold-bright);">استعلام آنلاین</div>
+          <h2>وضعیت پروانه اشتغال خود را بررسی کنید</h2>
+          <p>شناسه یکتا را وارد کنید تا اطلاعات کامل پروانه اشتغال شما نمایش داده شود.</p>
+        </div>
+      </div>
+      <div>
+        <div class="inquiry-form">
+          <div class="field">
+            <label>شناسه یکتا</label>
+            <input type="text" id="amayeshId" placeholder="مثال: ۱۲۳۴۵۶" class="mono" maxlength="6" inputmode="numeric">
+          </div>
+          <button class="cta-btn cta-gold" style="width:100%;" onclick="handleInquiry()">ارسال درخواست استعلام</button>
+        </div>
+
+        <div id="loadingStatus" class="loading-status">
+          درحال استعلام<span class="dots"></span>
+        </div>
+
+        <div id="resultCard" class="result-card">
+          <div class="result-header">نتیجه استعلام پروانه اشتغال</div>
+          <div class="result-body">
+            <div class="result-photo">
+              <img id="resultPhoto" src="" alt="عکس" style="display:none;">
+              <div id="noPhoto" class="no-photo">👤</div>
+            </div>
+            <div class="result-info">
+              <div class="item"><div class="label">نام و نام خانوادگی</div><div class="value" id="rName">—</div></div>
+              <div class="item"><div class="label">نام پدر</div><div class="value" id="rFather">—</div></div>
+              <div class="item"><div class="label">شناسه یکتا</div><div class="value" id="rId">—</div></div>
+              <div class="item"><div class="label">رشته کاری</div><div class="value" id="rField">—</div></div>
+              <div class="item"><div class="label">تاریخ صدور</div><div class="value" id="rIssueDate">—</div></div>
+              <div class="item"><div class="label">تاریخ انقضا</div><div class="value" id="rExpiryDate">—</div></div>
+              <div class="item"><div class="label">محل کار</div><div class="value" id="rWorkplace">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="footer-inner">
+    <div style="max-width:280px;">
+      <div class="brand" style="margin-bottom:12px;">
+        <div class="brand-mark">ع</div>
+        <div class="brand-name">سامانه استعلام پروانه اشتغال</div>
+      </div>
+      <p style="font-size:13px; opacity:.8;">سامانه مشاوره‌ای و استعلام وضعیت پروانه اشتغال اتباع خارجی.</p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h4>دسترسی سریع</h4>
+        <a href="#about">درباره ما</a>
+        <a href="#process">فرآیند استعلام</a>
+        <a href="#services">خدمات</a>
+        <a href="#inquiry">استعلام</a>
+      </div>
+      <div class="footer-col">
+        <h4>تماس با ما</h4>
+        <a href="tel:02188888888">۰۲۱-۸۸۸۸۸۸۸۸</a>
+        <a href="#">دفتر اتباع خارجی تهران</a>
+        <a href="#">تهران، خیابان امام خمینی</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span id="footerYear">© ۱۴۰۴ سامانه استعلام پروانه اشتغال</span>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+//  📚 دیتابیس (شناسه ۶ رقمی) - پروانه اشتغال
+// ============================================================
+const database = {
+  "123456": {
+    name: "علی محمدی",
+    father: "رضا محمدی",
+    id: "123456",
+    field: "مهندسی نرم‌افزار",
+    issueDate: "۱۴۰۲/۰۵/۱۰",
+    expiryDate: "۱۴۰۴/۰۵/۱۰",
+    workplace: "تهران، خیابان آزادی، پلاک ۱۲",
+    photo: "https://via.placeholder.com/120"
+  },
+  "654321": {
+    name: "زهرا کریمی",
+    father: "حسین کریمی",
+    id: "654321",
+    field: "حسابداری",
+    issueDate: "۱۴۰۱/۰۸/۲۲",
+    expiryDate: "۱۴۰۳/۰۸/۲۲",
+    workplace: "اصفهان، خیابان امام، پلاک ۴۵",
+    photo: ""
+  },
+  "987654": {
+    name: "سعید رضایی",
+    father: "محمد رضایی",
+    id: "987654",
+    field: "مدیریت بازرگانی",
+    issueDate: "۱۴۰۳/۰۱/۱۵",
+    expiryDate: "۱۴۰۵/۰۱/۱۵",
+    workplace: "شیراز، بلوار حافظ، پلاک ۷۸",
+    photo: ""
+  },
+  // 👇 اطلاعات جدید رو اینجا اضافه کن (شناسه ۶ رقمی)
+  // "111111": {
+  //   name: "نام جدید",
+  //   father: "نام پدر",
+  //   id: "111111",
+  //   field: "رشته کاری",
+  //   issueDate: "۱۴۰۴/۰۱/۰۱",
+  //   expiryDate: "۱۴۰۵/۰۱/۰۱",
+  //   workplace: "آدرس محل کار",
+  //   photo: "https://your-image-link.jpg"
+  // }
+};
+
+// ============================================================
+//  تابع تبدیل اعداد فارسی به انگلیسی
+// ============================================================
+function convertToEnglishNumber(input) {
+  const persianMap = {
+    '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+    '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+  };
+  return input.replace(/[۰-۹]/g, function(match) {
+    return persianMap[match] || match;
+  });
+}
+
+// ============================================================
+//  تابع استعلام
+// ============================================================
+function handleInquiry() {
+  const input = document.getElementById('amayeshId');
+  const rawId = input.value.trim();
+  const resultCard = document.getElementById('resultCard');
+  const loadingStatus = document.getElementById('loadingStatus');
+
+  const id = convertToEnglishNumber(rawId);
+
+  resultCard.style.display = 'none';
+  loadingStatus.style.display = 'none';
+
+  if (!id) {
+    alert('لطفاً شناسه یکتا را وارد کنید.');
+    return;
+  }
+
+  if (!/^\d{6}$/.test(id)) {
+    alert('شناسه یکتا باید ۶ رقم باشد.');
+    return;
+  }
+
+  loadingStatus.style.display = 'block';
+  resultCard.style.display = 'none';
+
+  setTimeout(() => {
+    loadingStatus.style.display = 'none';
+
+    const data = database[id];
+
+    if (!data) {
+      alert('شناسه یکتا معتبر نیست. لطفاً دوباره بررسی کنید.');
+      return;
+    }
+
+    document.getElementById('rName').textContent = data.name || '—';
+    document.getElementById('rFather').textContent = data.father || '—';
+    document.getElementById('rId').textContent = data.id || '—';
+    document.getElementById('rField').textContent = data.field || '—';
+    document.getElementById('rIssueDate').textContent = data.issueDate || '—';
+    document.getElementById('rExpiryDate').textContent = data.expiryDate || '—';
+    document.getElementById('rWorkplace').textContent = data.workplace || '—';
+
+    const img = document.getElementById('resultPhoto');
+    const noPhoto = document.getElementById('noPhoto');
+    if (data.photo && data.photo.trim() !== '') {
+      img.src = data.photo;
+      img.style.display = 'block';
+      noPhoto.style.display = 'none';
+    } else {
+      img.style.display = 'none';
+      noPhoto.style.display = 'flex';
+    }
+
+    resultCard.style.display = 'block';
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  }, 1500);
+}
+
+// ============================================================
+//  تاریخ فوتر
+// ============================================================
+document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear() + ' سامانه استعلام پروانه اشتغال';
+
+// ============================================================
+//  استعلام با کلید Enter
+// ============================================================
+document.getElementById('amayeshId').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleInquiry();
+  }
+});
+
+console.log('🚀 سامانه استعلام پروانه اشتغال');
+console.log('📚 تعداد رکوردها:', Object.keys(database).length);
+</script>
+
+</body>
+</html>
